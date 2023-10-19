@@ -6,10 +6,7 @@ use std::{
 use color_eyre::eyre::Result;
 use crossterm::{
   cursor,
-  event::{
-    DisableBracketedPaste, DisableMouseCapture, EnableBracketedPaste, EnableMouseCapture, Event as CrosstermEvent,
-    KeyEvent, KeyEventKind, MouseEvent,
-  },
+  event::{Event as CrosstermEvent, KeyEvent, KeyEventKind, MouseEvent},
   terminal::{EnterAlternateScreen, LeaveAlternateScreen},
 };
 use futures::{FutureExt, StreamExt};
@@ -47,8 +44,6 @@ pub struct Tui {
   pub event_tx: UnboundedSender<Event>,
   pub frame_rate: f64,
   pub tick_rate: f64,
-  pub mouse: bool,
-  pub paste: bool,
 }
 
 impl Tui {
@@ -59,29 +54,15 @@ impl Tui {
     let (event_tx, event_rx) = mpsc::unbounded_channel();
     let cancellation_token = CancellationToken::new();
     let task = tokio::spawn(async {});
-    let mouse = false;
-    let paste = false;
-    Ok(Self { terminal, task, cancellation_token, event_rx, event_tx, frame_rate, tick_rate, mouse, paste })
+    Ok(Self { terminal, task, cancellation_token, event_rx, event_tx, frame_rate, tick_rate })
   }
 
-  pub fn tick_rate(mut self, tick_rate: f64) -> Self {
+  pub fn tick_rate(&mut self, tick_rate: f64) {
     self.tick_rate = tick_rate;
-    self
   }
 
-  pub fn frame_rate(mut self, frame_rate: f64) -> Self {
+  pub fn frame_rate(&mut self, frame_rate: f64) {
     self.frame_rate = frame_rate;
-    self
-  }
-
-  pub fn mouse(mut self, mouse: bool) -> Self {
-    self.mouse = mouse;
-    self
-  }
-
-  pub fn paste(mut self, paste: bool) -> Self {
-    self.paste = paste;
-    self
   }
 
   pub fn start(&mut self) {
@@ -167,12 +148,6 @@ impl Tui {
   pub fn enter(&mut self) -> Result<()> {
     crossterm::terminal::enable_raw_mode()?;
     crossterm::execute!(std::io::stderr(), EnterAlternateScreen, cursor::Hide)?;
-    if self.mouse {
-      crossterm::execute!(std::io::stderr(), EnableMouseCapture)?;
-    }
-    if self.paste {
-      crossterm::execute!(std::io::stderr(), EnableBracketedPaste)?;
-    }
     self.start();
     Ok(())
   }
@@ -181,12 +156,6 @@ impl Tui {
     self.stop()?;
     if crossterm::terminal::is_raw_mode_enabled()? {
       self.flush()?;
-      if self.paste {
-        crossterm::execute!(std::io::stderr(), DisableBracketedPaste)?;
-      }
-      if self.mouse {
-        crossterm::execute!(std::io::stderr(), DisableMouseCapture)?;
-      }
       crossterm::execute!(std::io::stderr(), LeaveAlternateScreen, cursor::Show)?;
       crossterm::terminal::disable_raw_mode()?;
     }
