@@ -4,11 +4,11 @@ use color_eyre::eyre::Result;
 use crossterm::event::{KeyCode, KeyEvent};
 use enum_iterator::{all, cardinality, next_cycle, previous_cycle, Sequence};
 use ratatui::{
-    prelude::Rect,
+    prelude::{Alignment, Constraint, Direction, Layout, Rect},
     style::{Color, Style},
     symbols::DOT,
     text::Line,
-    widgets::{Block, Borders, Tabs as TuiTabs},
+    widgets::{block::Position, Block, Borders, Padding, Tabs as TuiTabs},
 };
 use serde::{Deserialize, Serialize};
 use tokio::sync::mpsc::UnboundedSender;
@@ -59,14 +59,39 @@ impl Component for Tabs {
     }
 
     fn draw(&mut self, f: &mut Frame<'_>, area: Rect) -> Result<()> {
+        let rect = Layout::default()
+            .constraints(vec![Constraint::Percentage(100)])
+            .margin(1)
+            .split(area);
         let modes = all::<Tab>().collect::<Vec<_>>();
         let titles = modes
             .iter()
             .cloned()
             .map(|v| Line::from(v.to_string()))
-            .collect();
+            .collect::<Vec<Line>>();
+        f.render_widget(
+            Block::default()
+                .title("Shuttle TUI 🚀")
+                .title_position(Position::Top)
+                .title_alignment(Alignment::Center)
+                .borders(Borders::ALL),
+            rect[0],
+        );
+        let rect = Layout::default()
+            .direction(Direction::Horizontal)
+            .constraints(vec![
+                Constraint::Min(
+                    (rect[0]
+                        .width
+                        .checked_sub(titles.iter().map(|v| v.width()).sum::<usize>() as u16 + 10))
+                    .unwrap_or(rect[0].width / 2)
+                        / 2,
+                ),
+                Constraint::Percentage(100),
+            ])
+            .margin(1)
+            .split(rect[0]);
         let tabs = TuiTabs::new(titles)
-            .block(Block::default().title("Tabs").borders(Borders::ALL))
             .style(Style::default().fg(Color::White))
             .highlight_style(Style::default().fg(Color::Yellow))
             .divider(DOT)
@@ -76,7 +101,7 @@ impl Component for Tabs {
                     .position(|v| v == &self.tab)
                     .unwrap_or_default(),
             );
-        f.render_widget(tabs, area);
+        f.render_widget(tabs, rect[1]);
         Ok(())
     }
 }
