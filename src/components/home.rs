@@ -11,6 +11,7 @@ use super::{Component, Frame};
 use crate::{
     action::Action,
     config::{Config, KeyBindings},
+    tab::Tab,
 };
 
 #[derive(Default)]
@@ -29,6 +30,10 @@ impl Home {
 }
 
 impl Component for Home {
+    fn assigned_tab(&self) -> Option<Tab> {
+        Some(Tab::Home)
+    }
+
     fn register_action_handler(&mut self, tx: UnboundedSender<Action>) -> Result<()> {
         self.action_tx = Some(tx);
         Ok(())
@@ -49,7 +54,7 @@ impl Component for Home {
     }
 
     fn draw(&mut self, f: &mut Frame<'_>, area: Rect) -> Result<()> {
-        // f.render_widget(Paragraph::new("hello world"), area);
+        f.render_widget(Paragraph::new("hello world"), area);
 
         if self.show_help {
             let rect = f.size().inner(&Margin {

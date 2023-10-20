@@ -10,21 +10,25 @@ use super::{Component, Frame};
 use crate::{
     action::Action,
     config::{Config, KeyBindings},
+    tab::Tab,
 };
 
 #[derive(Default)]
-pub struct Home {
+pub struct Projects {
     command_tx: Option<UnboundedSender<Action>>,
     config: Config,
 }
 
-impl Home {
+impl Projects {
     pub fn new() -> Self {
         Self::default()
     }
 }
 
-impl Component for Home {
+impl Component for Projects {
+    fn assigned_tab(&self) -> Option<Tab> {
+        Some(Tab::Projects)
+    }
     fn register_action_handler(&mut self, tx: UnboundedSender<Action>) -> Result<()> {
         self.command_tx = Some(tx);
         Ok(())

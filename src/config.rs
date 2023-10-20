@@ -12,7 +12,7 @@ use serde::{
 use serde_json::Value as JsonValue;
 
 use crate::action::Action;
-use crate::mode::Mode;
+use crate::tab::Tab;
 
 const CONFIG: &str = include_str!("../.config/config.json5");
 
@@ -89,14 +89,14 @@ impl Config {
 }
 
 #[derive(Clone, Debug, Default, Deref, DerefMut)]
-pub struct KeyBindings(pub HashMap<Mode, HashMap<Vec<KeyEvent>, Action>>);
+pub struct KeyBindings(pub HashMap<Tab, HashMap<Vec<KeyEvent>, Action>>);
 
 impl<'de> Deserialize<'de> for KeyBindings {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: Deserializer<'de>,
     {
-        let parsed_map = HashMap::<Mode, HashMap<String, Action>>::deserialize(deserializer)?;
+        let parsed_map = HashMap::<Tab, HashMap<String, Action>>::deserialize(deserializer)?;
 
         let keybindings = parsed_map
             .into_iter()
@@ -285,14 +285,14 @@ pub fn parse_key_sequence(raw: &str) -> Result<Vec<KeyEvent>, String> {
 }
 
 #[derive(Clone, Debug, Default, Deref, DerefMut)]
-pub struct Styles(pub HashMap<Mode, HashMap<String, Style>>);
+pub struct Styles(pub HashMap<Tab, HashMap<String, Style>>);
 
 impl<'de> Deserialize<'de> for Styles {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: Deserializer<'de>,
     {
-        let parsed_map = HashMap::<Mode, HashMap<String, String>>::deserialize(deserializer)?;
+        let parsed_map = HashMap::<Tab, HashMap<String, String>>::deserialize(deserializer)?;
 
         let styles = parsed_map
             .into_iter()
@@ -471,7 +471,7 @@ mod tests {
         let c = Config::new()?;
         assert_eq!(
             c.keybindings
-                .get(&Mode::Home)
+                .get(&Tab::Home)
                 .unwrap()
                 .get(&parse_key_sequence("<q>").unwrap_or_default())
                 .unwrap(),

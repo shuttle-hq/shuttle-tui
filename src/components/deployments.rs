@@ -10,21 +10,25 @@ use super::{Component, Frame};
 use crate::{
     action::Action,
     config::{Config, KeyBindings},
+    tab::Tab,
 };
 
 #[derive(Default)]
-pub struct Home {
+pub struct Deployments {
     command_tx: Option<UnboundedSender<Action>>,
     config: Config,
 }
 
-impl Home {
+impl Deployments {
     pub fn new() -> Self {
         Self::default()
     }
 }
 
-impl Component for Home {
+impl Component for Deployments {
+    fn assigned_tab(&self) -> Option<Tab> {
+        Some(Tab::Deployments)
+    }
     fn register_action_handler(&mut self, tx: UnboundedSender<Action>) -> Result<()> {
         self.command_tx = Some(tx);
         Ok(())
@@ -44,7 +48,7 @@ impl Component for Home {
     }
 
     fn draw(&mut self, f: &mut Frame<'_>, area: Rect) -> Result<()> {
-        f.render_widget(Paragraph::new("projects"), area);
+        f.render_widget(Paragraph::new("deployments"), area);
         Ok(())
     }
 }

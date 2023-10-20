@@ -5,7 +5,7 @@ use serde::{
     Deserialize, Serialize,
 };
 
-use crate::mode::Mode;
+use crate::tab::Tab;
 
 //// ANCHOR: action_enum
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]

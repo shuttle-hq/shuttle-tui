@@ -3,7 +3,13 @@ use std::{collections::HashMap, time::Duration};
 use color_eyre::eyre::Result;
 use crossterm::event::{KeyCode, KeyEvent};
 use enum_iterator::{all, cardinality, next_cycle, previous_cycle, Sequence};
-use ratatui::{prelude::*, symbols::DOT, widgets::*};
+use ratatui::{
+    prelude::Rect,
+    style::{Color, Style},
+    symbols::DOT,
+    text::Line,
+    widgets::{Block, Borders, Tabs as TuiTabs},
+};
 use serde::{Deserialize, Serialize};
 use tokio::sync::mpsc::UnboundedSender;
 
@@ -11,23 +17,23 @@ use super::{Component, Frame};
 use crate::{
     action::Action,
     config::{Config, KeyBindings},
-    mode::Mode,
+    tab::Tab,
 };
 
 #[derive(Default)]
-pub struct Tab {
-    mode: Mode,
+pub struct Tabs {
+    tab: Tab,
     command_tx: Option<UnboundedSender<Action>>,
     config: Config,
 }
 
-impl Tab {
+impl Tabs {
     pub fn new() -> Self {
         Self::default()
     }
 }
 
-impl Component for Tab {
+impl Component for Tabs {
     fn register_action_handler(&mut self, tx: UnboundedSender<Action>) -> Result<()> {
         self.command_tx = Some(tx);
         Ok(())
@@ -42,10 +48,10 @@ impl Component for Tab {
         match action {
             Action::Tick => {}
             Action::NextTab => {
-                self.mode = next_cycle(&self.mode).unwrap_or_default();
+                self.tab = next_cycle(&self.tab).unwrap_or_default();
             }
             Action::PreviousTab => {
-                self.mode = previous_cycle(&self.mode).unwrap_or_default();
+                self.tab = previous_cycle(&self.tab).unwrap_or_default();
             }
             _ => {}
         }
@@ -53,13 +59,13 @@ impl Component for Tab {
     }
 
     fn draw(&mut self, f: &mut Frame<'_>, area: Rect) -> Result<()> {
-        let modes = all::<Mode>().collect::<Vec<_>>();
+        let modes = all::<Tab>().collect::<Vec<_>>();
         let titles = modes
             .iter()
             .cloned()
             .map(|v| Line::from(v.to_string()))
             .collect();
-        let tabs = Tabs::new(titles)
+        let tabs = TuiTabs::new(titles)
             .block(Block::default().title("Tabs").borders(Borders::ALL))
             .style(Style::default().fg(Color::White))
             .highlight_style(Style::default().fg(Color::Yellow))
@@ -67,7 +73,7 @@ impl Component for Tab {
             .select(
                 modes
                     .iter()
-                    .position(|v| v == &self.mode)
+                    .position(|v| v == &self.tab)
                     .unwrap_or_default(),
             );
         f.render_widget(tabs, area);

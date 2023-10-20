@@ -6,25 +6,29 @@ use tokio::sync::mpsc::UnboundedSender;
 use crate::{
     action::Action,
     config::Config,
+    tab::Tab,
     tui::{Event, Frame},
 };
 
-pub mod deployment;
+pub mod deployments;
 pub mod home;
-pub mod project;
+pub mod projects;
 pub mod tab;
 
 //// ANCHOR: component
 pub trait Component {
+    fn init(&mut self) -> Result<()> {
+        Ok(())
+    }
+    fn assigned_tab(&self) -> Option<Tab> {
+        None
+    }
     #[allow(unused_variables)]
     fn register_action_handler(&mut self, tx: UnboundedSender<Action>) -> Result<()> {
         Ok(())
     }
     #[allow(unused_variables)]
     fn register_config_handler(&mut self, config: Config) -> Result<()> {
-        Ok(())
-    }
-    fn init(&mut self) -> Result<()> {
         Ok(())
     }
     fn handle_events(&mut self, event: Option<Event>) -> Result<Option<Action>> {

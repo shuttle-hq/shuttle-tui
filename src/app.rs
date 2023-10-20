@@ -9,9 +9,9 @@ use tokio::sync::mpsc;
 use crate::{
     action::Action,
     args::Args,
-    components::{home::Home, tab::Tab, Component},
+    components::{deployments::Deployments, home::Home, projects::Projects, tab::Tabs, Component},
     config::Config,
-    mode::Mode,
+    tab::Tab,
     tui,
 };
 
@@ -23,25 +23,31 @@ pub struct App {
     pub components: Vec<Box<dyn Component>>,
     pub should_quit: bool,
     pub should_suspend: bool,
-    pub mode: Mode,
+    pub tab: Tab,
     pub last_tick_key_events: Vec<KeyEvent>,
 }
 
 impl App {
     pub fn new(shuttle: Shuttle, args: &Args) -> Result<Self> {
         let config = Config::new()?;
-        let tab = Tab::new();
+        let tab = Tabs::new();
         let home = Home::new();
-        let mode = Mode::Home;
+        let projects = Projects::new();
+        let deployments = Deployments::new();
         Ok(Self {
             shuttle,
             tick_rate: args.tick_rate,
             frame_rate: args.frame_rate,
-            components: vec![Box::new(tab), Box::new(home)],
+            components: vec![
+                Box::new(tab),
+                Box::new(home),
+                Box::new(projects),
+                Box::new(deployments),
+            ],
             should_quit: false,
             should_suspend: false,
             config,
-            mode,
+            tab: Tab::Home,
             last_tick_key_events: Vec::new(),
         })
     }
@@ -74,7 +80,7 @@ impl App {
                     tui::Event::Render => action_tx.send(Action::Render)?,
                     tui::Event::Resize(x, y) => action_tx.send(Action::Resize(x, y))?,
                     tui::Event::Key(key) => {
-                        if let Some(keymap) = self.config.keybindings.get(&self.mode) {
+                        if let Some(keymap) = self.config.keybindings.get(&self.tab) {
                             if let Some(action) = keymap.get(&vec![key.clone()]) {
                                 log::info!("Got action: {action:?}");
                                 action_tx.send(action.clone())?;
@@ -93,7 +99,11 @@ impl App {
                     }
                     _ => {}
                 }
-                for component in self.components.iter_mut() {
+                for component in self
+                    .components
+                    .iter_mut()
+                    .filter(|v| v.assigned_tab().is_none() || v.assigned_tab() == Some(self.tab))
+                {
                     if let Some(action) = component.handle_events(Some(e.clone()))? {
                         action_tx.send(action)?;
                     }
@@ -114,7 +124,9 @@ impl App {
                     Action::Resize(w, h) => {
                         tui.resize(Rect::new(0, 0, w, h))?;
                         tui.draw(|f| {
-                            for component in self.components.iter_mut() {
+                            for component in self.components.iter_mut().filter(|v| {
+                                v.assigned_tab().is_none() || v.assigned_tab() == Some(self.tab)
+                            }) {
                                 let r = component.draw(f, f.size());
                                 if let Err(e) = r {
                                     action_tx
@@ -126,7 +138,9 @@ impl App {
                     }
                     Action::Render => {
                         tui.draw(|f| {
-                            for component in self.components.iter_mut() {
+                            for component in self.components.iter_mut().filter(|v| {
+                                v.assigned_tab().is_none() || v.assigned_tab() == Some(self.tab)
+                            }) {
                                 let r = component.draw(f, f.size());
                                 if let Err(e) = r {
                                     action_tx
@@ -137,14 +151,18 @@ impl App {
                         })?;
                     }
                     Action::NextTab => {
-                        self.mode = next_cycle(&self.mode).unwrap_or_default();
+                        self.tab = next_cycle(&self.tab).unwrap_or_default();
                     }
                     Action::PreviousTab => {
-                        self.mode = previous_cycle(&self.mode).unwrap_or_default();
+                        self.tab = previous_cycle(&self.tab).unwrap_or_default();
                     }
                     _ => {}
                 }
-                for component in self.components.iter_mut() {
+                for component in self
+                    .components
+                    .iter_mut()
+                    .filter(|v| v.assigned_tab().is_none() || v.assigned_tab() == Some(self.tab))
+                {
                     if let Some(action) = component.update(action.clone())? {
                         action_tx.send(action)?
                     };
