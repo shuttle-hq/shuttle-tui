@@ -2,10 +2,26 @@
   "keybindings": {
     "Home": {
       "<q>": "Quit", // Quit the application
-      "<j>": "ScheduleIncrement",
-      "<k>": "ScheduleDecrement",
       "<?>": "ToggleShowHelp",
       "</>": "EnterInsert",
+      "<l>": "NextTab",
+      "<h>": "PreviousTab",
+      "<Ctrl-d>": "Quit", // Another way to quit
+      "<Ctrl-c>": "Quit", // Yet another way to quit
+      "<Ctrl-z>": "Suspend" // Suspend the application
+    },
+    "Projects": {
+      "<q>": "Quit", // Quit the application
+      "<l>": "NextTab",
+      "<h>": "PreviousTab",
+      "<Ctrl-d>": "Quit", // Another way to quit
+      "<Ctrl-c>": "Quit", // Yet another way to quit
+      "<Ctrl-z>": "Suspend" // Suspend the application
+    },
+    "Deployments": {
+      "<q>": "Quit", // Quit the application
+      "<l>": "NextTab",
+      "<h>": "PreviousTab",
       "<Ctrl-d>": "Quit", // Another way to quit
       "<Ctrl-c>": "Quit", // Yet another way to quit
       "<Ctrl-z>": "Suspend" // Suspend the application

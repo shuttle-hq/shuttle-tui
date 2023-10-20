@@ -1,6 +1,7 @@
 use cargo_shuttle::Shuttle;
 use color_eyre::eyre::Result;
 use crossterm::event::KeyEvent;
+use enum_iterator::{next_cycle, previous_cycle, Sequence};
 use ratatui::prelude::Rect;
 use serde::{Deserialize, Serialize};
 use tokio::sync::mpsc;
@@ -8,16 +9,11 @@ use tokio::sync::mpsc;
 use crate::{
     action::Action,
     args::Args,
-    components::{fps::FpsCounter, home::Home, Component},
+    components::{home::Home, tab::Tab, Component},
     config::Config,
+    mode::Mode,
     tui,
 };
-
-#[derive(Default, Debug, Copy, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
-pub enum Mode {
-    #[default]
-    Home,
-}
 
 pub struct App {
     pub shuttle: Shuttle,
@@ -33,15 +29,15 @@ pub struct App {
 
 impl App {
     pub fn new(shuttle: Shuttle, args: &Args) -> Result<Self> {
-        let home = Home::new();
-        let fps = FpsCounter::new();
         let config = Config::new()?;
+        let tab = Tab::new();
+        let home = Home::new();
         let mode = Mode::Home;
         Ok(Self {
             shuttle,
             tick_rate: args.tick_rate,
             frame_rate: args.frame_rate,
-            components: vec![Box::new(home), Box::new(fps)],
+            components: vec![Box::new(tab), Box::new(home)],
             should_quit: false,
             should_suspend: false,
             config,
@@ -139,6 +135,12 @@ impl App {
                                 }
                             }
                         })?;
+                    }
+                    Action::NextTab => {
+                        self.mode = next_cycle(&self.mode).unwrap_or_default();
+                    }
+                    Action::PreviousTab => {
+                        self.mode = previous_cycle(&self.mode).unwrap_or_default();
                     }
                     _ => {}
                 }

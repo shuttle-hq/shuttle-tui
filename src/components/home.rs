@@ -49,7 +49,7 @@ impl Component for Home {
     }
 
     fn draw(&mut self, f: &mut Frame<'_>, area: Rect) -> Result<()> {
-        f.render_widget(Paragraph::new("hello world"), area);
+        // f.render_widget(Paragraph::new("hello world"), area);
 
         if self.show_help {
             let rect = f.size().inner(&Margin {
