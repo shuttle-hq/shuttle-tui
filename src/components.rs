@@ -9,6 +9,7 @@ use crate::{
   tui::{Event, Frame},
 };
 
+pub mod demo;
 pub mod fps;
 pub mod home;
 
