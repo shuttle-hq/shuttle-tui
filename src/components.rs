@@ -9,8 +9,8 @@ use crate::{
   tui::{Event, Frame},
 };
 
-pub mod home;
 pub mod fps;
+pub mod home;
 
 //// ANCHOR: component
 pub trait Component {

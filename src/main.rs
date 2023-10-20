@@ -1,23 +1,11 @@
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
-
 // ANCHOR: all
-pub mod action;
-pub mod app;
-pub mod cli;
-pub mod components;
-pub mod config;
-pub mod tui;
-pub mod utils;
-
+use cargo_shuttle::Shuttle;
 use clap::Parser;
-use cli::Cli;
-use color_eyre::eyre::Result;
-
-use crate::{
+use color_eyre::eyre::{eyre, Result};
+use shuttle_tui::{
   app::App,
-  utils::{initialize_logging, initialize_panic_handler, version},
+  args::Args,
+  utils::{initialize_logging, initialize_panic_handler},
 };
 
 async fn tokio_main() -> Result<()> {
@@ -25,8 +13,9 @@ async fn tokio_main() -> Result<()> {
 
   initialize_panic_handler()?;
 
-  let args = Cli::parse();
-  let mut app = App::new(args.tick_rate, args.frame_rate)?;
+  let args = Args::parse();
+  let shuttle = Shuttle::new().map_err(|e| eyre!("{e}"))?;
+  let mut app = App::new(shuttle, &args)?;
   app.run().await?;
 
   Ok(())
