@@ -1,6 +1,6 @@
 use std::{collections::HashMap, time::Duration};
 
-use color_eyre::eyre::Result;
+use color_eyre::{eyre::Result, owo_colors::OwoColorize};
 use crossterm::event::{KeyCode, KeyEvent};
 use ratatui::{prelude::*, widgets::*};
 use serde::{Deserialize, Serialize};
@@ -13,6 +13,32 @@ use crate::{
     config::{Config, KeyBindings},
     tab::Tab,
 };
+
+const SHUTTLE_LOGO_ONLY: &str = "
+                   .... 
+                 :-----.
+              .-==-----.
+        -+==========--. 
+      -+++++=======-.   
+         :++++=====     
+         :++++++===     
+     -----::::=+++-     
+     ****=    -+-.      
+     ++++-    :.        
+";
+
+const SHUTTLE_LOGO: &str = "
+                   ....                                                                
+                 :-----.                                                               
+              .-==-----.            .==                 .      .     -=-               
+        -+==========--.        .    :==                ==:    ==:    -=-               
+      -+++++=======-.        ==--=  :======.  ==. .==  =====. =====. -=-  .-====-      
+         :++++=====         .==-:   :==  -=-  ==. .==  ==:    ==:    -=-  ==-::==-     
+         :++++++===           .:==: :==  :=-  ==. .==  ==:    ==-    -=-  ==-.....     
+     -----::::=+++-         :==-==: :==  :=-  :======  .====: .====: .==- .-=====      
+     ****=    -+-.                                                                     
+     ++++-    :.                                             Build Backends. Fast.     
+";
 
 #[derive(Default)]
 pub struct Home {
@@ -54,8 +80,58 @@ impl Component for Home {
     }
 
     fn draw(&mut self, f: &mut Frame<'_>, area: Rect) -> Result<()> {
-        f.render_widget(Paragraph::new("hello world"), area);
+        let area = Layout::default()
+            .constraints(vec![Constraint::Percentage(100)])
+            .margin(3)
+            .split(area)[0];
+        let rect = Layout::default()
+            .direction(Direction::Vertical)
+            .constraints(vec![Constraint::Min(13), Constraint::Percentage(100)])
+            .split(area);
+        f.render_widget(
+            Paragraph::new(if area.width < 80 {
+                SHUTTLE_LOGO_ONLY
+            } else {
+                SHUTTLE_LOGO
+            })
+            .style(Style::default().fg(Color::Rgb(253, 145, 62)))
+            .alignment(Alignment::Center),
+            rect[0],
+        );
 
+        let rect = Layout::default()
+            .direction(Direction::Vertical)
+            .constraints(vec![Constraint::Percentage(100), Constraint::Min(1)])
+            .split(rect[1]);
+
+        {
+            let rect = Layout::default()
+                .direction(Direction::Horizontal)
+                .constraints(vec![
+                    Constraint::Percentage(33),
+                    Constraint::Percentage(33),
+                    Constraint::Percentage(33),
+                ])
+                .split(rect[0]);
+            let rect = Layout::default()
+                .direction(Direction::Vertical)
+                .constraints(vec![Constraint::Min(1), Constraint::Percentage(100)])
+                .split(rect[1]);
+            f.render_widget(
+                Paragraph::new("Quick Access")
+                    .alignment(Alignment::Center)
+                    .white(),
+                rect[0],
+            );
+            f.render_widget(Block::default().borders(Borders::ALL), rect[1]);
+        }
+        f.render_widget(
+            Paragraph::new(env!("CARGO_PKG_REPOSITORY"))
+                .alignment(Alignment::Center)
+                .italic()
+                .white(),
+            rect[1],
+        );
         if self.show_help {
             let rect = f.size().inner(&Margin {
                 horizontal: 4,

@@ -5,7 +5,7 @@ use crossterm::event::{KeyCode, KeyEvent};
 use enum_iterator::{all, cardinality, next_cycle, previous_cycle, Sequence};
 use ratatui::{
     prelude::{Alignment, Constraint, Direction, Layout, Rect},
-    style::{Color, Style},
+    style::{Color, Style, Stylize},
     symbols::DOT,
     text::Line,
     widgets::{block::Position, Block, Borders, Padding, Tabs as TuiTabs},
@@ -71,9 +71,10 @@ impl Component for Tabs {
             .collect::<Vec<Line>>();
         f.render_widget(
             Block::default()
-                .title("Shuttle TUI 🚀")
+                .title("Shuttle TUI")
                 .title_position(Position::Top)
                 .title_alignment(Alignment::Center)
+                .title_style(Style::default().bold())
                 .borders(Borders::ALL),
             rect[0],
         );
@@ -93,7 +94,7 @@ impl Component for Tabs {
             .split(rect[0]);
         let tabs = TuiTabs::new(titles)
             .style(Style::default().fg(Color::White))
-            .highlight_style(Style::default().fg(Color::Yellow))
+            .highlight_style(Style::default().fg(Color::Rgb(253, 145, 62)))
             .divider(DOT)
             .select(
                 modes
