@@ -9,6 +9,7 @@ pub mod app;
 pub mod args;
 pub mod components;
 pub mod config;
+pub mod shuttle;
 pub mod tab;
 pub mod tui;
 pub mod utils;

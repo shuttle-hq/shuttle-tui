@@ -1,4 +1,3 @@
-use cargo_shuttle::Shuttle;
 use color_eyre::eyre::Result;
 use crossterm::event::KeyEvent;
 use enum_iterator::{next_cycle, previous_cycle, Sequence};
@@ -11,6 +10,7 @@ use crate::{
     args::Args,
     components::{deployments::Deployments, home::Home, projects::Projects, tab::Tabs, Component},
     config::Config,
+    shuttle::Shuttle,
     tab::Tab,
     tui,
 };

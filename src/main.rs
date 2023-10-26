@@ -1,10 +1,10 @@
 // ANCHOR: all
-use cargo_shuttle::Shuttle;
 use clap::Parser;
-use color_eyre::eyre::{eyre, Result};
+use color_eyre::eyre::Result;
 use shuttle_tui::{
     app::App,
     args::Args,
+    shuttle::Shuttle,
     utils::{initialize_logging, initialize_panic_handler},
 };
 
@@ -14,7 +14,7 @@ async fn tokio_main() -> Result<()> {
     initialize_panic_handler()?;
 
     let args = Args::parse();
-    let shuttle = Shuttle::new().map_err(|e| eyre!("{e}"))?;
+    let shuttle = Shuttle;
     let mut app = App::new(shuttle, &args)?;
     app.run().await?;
 
