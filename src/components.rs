@@ -1,14 +1,9 @@
 use color_eyre::eyre::Result;
 use crossterm::event::{KeyEvent, MouseEvent};
-use ratatui::layout::Rect;
+use ratatui::{layout::Rect, Frame};
 use tokio::sync::mpsc::UnboundedSender;
 
-use crate::{
-    action::Action,
-    config::Config,
-    tab::Tab,
-    tui::{Event, Frame},
-};
+use crate::{action::Action, config::Config, tab::Tab, tui::Event};
 
 pub mod deployments;
 pub mod home;
@@ -51,6 +46,6 @@ pub trait Component {
     fn update(&mut self, action: Action) -> Result<Option<Action>> {
         Ok(None)
     }
-    fn draw(&mut self, f: &mut Frame<'_>, rect: Rect) -> Result<()>;
+    fn draw(&mut self, f: &mut Frame, rect: Rect) -> Result<()>;
 }
 //// ANCHOR_END: component

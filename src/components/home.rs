@@ -115,15 +115,73 @@ impl Component for Home {
                 .split(rect[0]);
             let rect = Layout::default()
                 .direction(Direction::Vertical)
-                .constraints(vec![Constraint::Min(1), Constraint::Percentage(100)])
+                .constraints([Constraint::Percentage(30), Constraint::Percentage(70)])
                 .split(rect[1]);
-            f.render_widget(
-                Paragraph::new("Quick Access")
-                    .alignment(Alignment::Center)
-                    .white(),
-                rect[0],
-            );
-            f.render_widget(Block::default().borders(Borders::ALL), rect[1]);
+            {
+                f.render_widget(
+                    Block::default()
+                        .borders(Borders::RIGHT | Borders::LEFT | Borders::TOP)
+                        .border_type(BorderType::Rounded)
+                        .title("Quick Access")
+                        .title_alignment(Alignment::Center),
+                    rect[0],
+                );
+                let items = [
+                    ListItem::new(Line::from("Getting Started").alignment(Alignment::Center)),
+                    ListItem::new(Line::from("Projects").alignment(Alignment::Center)),
+                    ListItem::new(Line::from("Deployments").alignment(Alignment::Center)),
+                    ListItem::new(Line::from("Documentation").alignment(Alignment::Center)),
+                ];
+                let list = List::new(items)
+                    .style(Style::default().fg(Color::White))
+                    .highlight_style(Style::default().add_modifier(Modifier::ITALIC))
+                    .highlight_symbol(">>");
+                f.render_widget(
+                    list,
+                    rect[0].inner(&Margin {
+                        horizontal: 1,
+                        vertical: 2,
+                    }),
+                );
+            }
+            {
+                f.render_widget(
+                    Block::default()
+                        .borders(Borders::ALL)
+                        .title("Key Bindings")
+                        .border_type(BorderType::Rounded)
+                        .title_alignment(Alignment::Center),
+                    rect[1],
+                );
+                let rows = vec![
+                    Row::new(vec![
+                        Line::from("?").alignment(Alignment::Center),
+                        Line::from("Open Help").alignment(Alignment::Center),
+                    ]),
+                    Row::new(vec![
+                        Line::from("q").alignment(Alignment::Center),
+                        Line::from("Quit").alignment(Alignment::Center),
+                    ]),
+                ];
+                let table = Table::new(rows)
+                    .header(
+                        Row::new(vec![
+                            Line::from("Key").alignment(Alignment::Center),
+                            Line::from("Action").alignment(Alignment::Center),
+                        ])
+                        .bottom_margin(1)
+                        .style(Style::default().add_modifier(Modifier::BOLD)),
+                    )
+                    .widths(&[Constraint::Percentage(50), Constraint::Percentage(50)])
+                    .column_spacing(1);
+                f.render_widget(
+                    table,
+                    rect[1].inner(&Margin {
+                        horizontal: 1,
+                        vertical: 1,
+                    }),
+                );
+            }
         }
         f.render_widget(
             Paragraph::new(env!("CARGO_PKG_REPOSITORY"))
@@ -146,30 +204,6 @@ impl Component for Home {
                 .borders(Borders::ALL)
                 .border_style(Style::default().fg(Color::Yellow));
             f.render_widget(block, rect);
-            let rows = vec![
-                Row::new(vec!["j", "Increment"]),
-                Row::new(vec!["k", "Decrement"]),
-                Row::new(vec!["/", "Enter Input"]),
-                Row::new(vec!["ESC", "Exit Input"]),
-                Row::new(vec!["Enter", "Submit Input"]),
-                Row::new(vec!["q", "Quit"]),
-                Row::new(vec!["?", "Open Help"]),
-            ];
-            let table = Table::new(rows)
-                .header(
-                    Row::new(vec!["Key", "Action"])
-                        .bottom_margin(1)
-                        .style(Style::default().add_modifier(Modifier::BOLD)),
-                )
-                .widths(&[Constraint::Percentage(10), Constraint::Percentage(90)])
-                .column_spacing(1);
-            f.render_widget(
-                table,
-                rect.inner(&Margin {
-                    vertical: 4,
-                    horizontal: 2,
-                }),
-            );
         };
         Ok(())
     }
