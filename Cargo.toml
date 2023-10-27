@@ -2,11 +2,9 @@
 name = "shuttle-tui"
 version = "0.1.0"
 edition = "2021"
-repository = "https://github.com/orhun/shuttle-tui"
+repository = "https://github.com/shuttle-hq/shuttle-tui"
 description = "Terminal user interface for Shuttle"
-authors = ["Orhun Parmaksız <orhunparmaksiz@gmail.com>"]
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+authors = ["Orhun Parmaksız <orhun@shuttle.rs>"]
 
 [dependencies]
 better-panic = "0.3.0"
